@@ -25,6 +25,7 @@ export type Action =
   | { type: "NEXT_QUESTION" }
   | { type: "RESTART_ROUND"; round: Question[] }
   | { type: "SHOW_SUCCESS" }
+  | { type: "NEXT_PLAYER"; round: Question[] }
   | { type: "RESET" }
   | { type: "OPEN_RESET" }
   | { type: "CLOSE_RESET" };
@@ -43,6 +44,7 @@ export const initialState: State = {
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "PREPARE":
+    case "NEXT_PLAYER":
       return {
         ...initialState,
         phase: gameConfig.countdownSeconds > 0 ? "countdown" : "playing",
@@ -193,16 +195,32 @@ function ProgressTrack({ round, completed }: { round: Question[]; completed: num
   );
 }
 
-function Feedback({ question, result }: { question: Question; result: Result }) {
-  if (result === "idle") return null;
-  const correctLabel = question.mustDeclare ? "須申報" : "不需申報";
+function Feedback({ result }: { result: Result }) {
+  if (result !== "correct") return null;
   return (
-    <div className={`feedback feedback--${result}`} role="status" aria-live="assertive">
-      <span className="feedback__mark">{result === "correct" ? "✓" : "!"}</span>
+    <div className="feedback feedback--correct" role="status" aria-live="assertive">
+      <span className="feedback__mark">✓</span>
       <div>
-        <strong>{result === "correct" ? "判斷正確" : "答錯了，進度歸零"}</strong>
-        <p>正確答案：{correctLabel}・{categories[question.category].rule}</p>
+        <strong>答對！</strong>
+        <p>下一題即將出現</p>
       </div>
+    </div>
+  );
+}
+
+function RoundResetAlert() {
+  return (
+    <div className="round-reset-alert" role="status" aria-live="assertive">
+      <span className="round-reset-alert__mark">×</span>
+      <div className="round-reset-alert__copy">
+        <span>本輪挑戰結束</span>
+        <strong>答錯，進度歸零</strong>
+      </div>
+      <div className="round-reset-alert__progress">
+        <small>目前進度</small>
+        <b>0／5</b>
+      </div>
+      <span className="round-reset-alert__next">正在重新抽題</span>
     </div>
   );
 }
@@ -219,19 +237,22 @@ function QuestionScreen({
   onRestart: () => void;
 }) {
   const question = state.round[state.questionIndex];
-  const category = categories[question.category];
   const answered = state.result !== "idle";
   const isLastCorrect = state.result === "correct" && state.streak === TARGET_STREAK;
 
   return (
     <section className="question-screen screen">
-      <div className="quiz-status">
-        <div className="streak-copy">
-          <span>CONTINUOUS CLEAR</span>
-          <strong>已連續答對 <b>{state.streak}</b>／{TARGET_STREAK} 題</strong>
+      {state.result === "wrong" ? (
+        <RoundResetAlert />
+      ) : (
+        <div className="quiz-status">
+          <div className="streak-copy">
+            <span>CONTINUOUS CLEAR</span>
+            <strong>已連續答對 <b>{state.streak}</b>／{TARGET_STREAK} 題</strong>
+          </div>
+          <ProgressTrack round={state.round} completed={state.streak} />
         </div>
-        <ProgressTrack round={state.round} completed={state.streak} />
-      </div>
+      )}
 
       <article className="declaration-card">
         <div className="declaration-card__meta">
@@ -241,8 +262,7 @@ function QuestionScreen({
         {gameConfig.showCategory && (
           <div className={`category-pill category-pill--${question.category}`}>
             <CategoryIcon category={question.category} />
-            <span>{category.name}</span>
-            <strong>{category.checkpoint}</strong>
+            <span>{categories[question.category].name}</span>
           </div>
         )}
         <h1>{question.prompt}</h1>
@@ -254,20 +274,20 @@ function QuestionScreen({
             return (
               <button
                 key={String(answer)}
-                className={`choice-button choice-button--${answer ? "red" : "green"} ${correct ? "is-correct" : ""} ${wrong ? "is-wrong" : ""}`}
+                className={`choice-button ${correct ? "is-correct" : ""} ${wrong ? "is-wrong" : ""}`}
                 disabled={answered}
                 onClick={() => onAnswer(answer)}
               >
                 <span className="choice-button__sign">{answer ? "申" : "免"}</span>
-                <span><small>{answer ? "RED CHANNEL" : "GREEN CHANNEL"}</small><strong>{answer ? "須申報" : "不需申報"}</strong></span>
-                {correct && <b className="choice-result">✓ 正確答案</b>}
-                {wrong && <b className="choice-result">× 你的答案</b>}
+                <span><strong>{answer ? "須申報" : "不需申報"}</strong></span>
+                {correct && <b className="choice-result">✓ 正確</b>}
+                {wrong && <b className="choice-result">× 錯誤</b>}
               </button>
             );
           })}
         </div>
 
-        <Feedback question={question} result={state.result} />
+        <Feedback result={state.result} />
 
         {gameConfig.flowMode === "guided" && answered && !isLastCorrect && (
           <button className="guided-next" onClick={state.result === "correct" ? onNext : onRestart}>
@@ -376,7 +396,11 @@ export default function App() {
             onRestart={() => dispatch({ type: "RESTART_ROUND", round: createRound() })}
           />
         )}
-        {state.phase === "success" && <SuccessScreen onNextPlayer={() => dispatch({ type: "RESET" })} />}
+        {state.phase === "success" && (
+          <SuccessScreen
+            onNextPlayer={() => dispatch({ type: "NEXT_PLAYER", round: createRound() })}
+          />
+        )}
         <footer className="app-footer">
           <span>RUNWAY GO! 2026 桃機活力嘉年華</span>
           <span>APP {gameConfig.appVersion}・題庫 {gameConfig.questionBankVersion}</span>

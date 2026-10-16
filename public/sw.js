@@ -1,4 +1,4 @@
-const CACHE_NAME = "final-call-entry-v1";
+const CACHE_NAME = "final-call-entry-v2";
 const APP_SHELL = [
   "./",
   "./index.html",

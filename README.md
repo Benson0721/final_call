@@ -39,8 +39,10 @@ pnpm preview
 
 題庫與分類資料在 `src/questions.ts`，抽題與題庫驗證在 `src/game.ts`。
 
-## PWA 與 APK
+## iPad PWA 安裝
 
-專案已包含 Web App Manifest、192／512 圖示與離線 Service Worker。PWA 首次安裝仍須經由 `localhost` 或 HTTPS 網址開啟；完成首次載入後可離線使用。若後續要包成 Android APK，可直接將同一份 `dist/` 接入 Capacitor，不需要重寫遊戲邏輯。
+專案已包含 Web App Manifest、橫向顯示設定、iPad 主畫面圖示與離線 Service Worker。將 `dist/` 部署至 HTTPS 網址後，在每台 iPad 的 Safari 開啟網址，選擇「分享」→「加入主畫面」；第一次開啟完成後可離線使用。
+
+活動前請在六台平板各自完成一次載入，並在飛航模式下測試。建議啟用 iPad 的「引導使用模式」，避免參賽者離開遊戲。若後續要包成 Android APK 或 iOS IPA，可直接將同一份 React 程式接入 Capacitor，不需要重寫遊戲邏輯。
 
 更新前端檔案並重新發佈時，請同步提高 `public/sw.js` 的 `CACHE_NAME`，避免平板沿用舊快取。

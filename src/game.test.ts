@@ -64,4 +64,20 @@ describe("challenge flow", () => {
     expect(state.result).toBe("idle");
     expect(state.round).toBe(nextRound);
   });
+
+  it("starts the next participant at the three-second countdown", () => {
+    const nextRound = createRound(() => 0.5);
+    const successState: State = {
+      ...initialState,
+      phase: "success",
+      round: createRound(() => 0.25),
+      streak: 5,
+    };
+
+    const state = reducer(successState, { type: "NEXT_PLAYER", round: nextRound });
+    expect(state.phase).toBe("countdown");
+    expect(state.countdown).toBe(3);
+    expect(state.streak).toBe(0);
+    expect(state.round).toBe(nextRound);
+  });
 });
