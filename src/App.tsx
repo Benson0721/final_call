@@ -268,7 +268,7 @@ function QuestionScreen({
           <div className="channel-choice" aria-label="請選擇是否須申報">
             {([true, false] as const).map((answer) => {
               const correct = answered && question.mustDeclare === answer;
-              const wrong = answered && state.selectedAnswer === answer && !correct;
+              const wrong = answered && !correct;
               return (
                 <button
                   key={String(answer)}

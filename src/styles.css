@@ -142,7 +142,7 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
 .taiwan-orbit {
   position: absolute; left: 50%; top: 48%; width: 220px; height: 220px; display: grid; place-items: center;
   border: 2px dashed rgba(11,107,85,.28); border-radius: 50%; color: var(--customs-green);
-  transform: translate(-50%,-50%); background: radial-gradient(circle, white 0 48%, rgba(255,255,255,.2) 49% 100%);
+  z-index: 2; transform: translate(-50%,-50%); background: radial-gradient(circle, white 0 48%, rgba(255,255,255,.2) 49% 100%);
 }
 .taiwan-orbit svg { width: 78px; filter: drop-shadow(0 8px 12px rgba(8,78,62,.18)); }
 .taiwan-orbit span { position: absolute; bottom: 24px; font-size: .8rem; font-weight: 950; letter-spacing: .18em; }
@@ -152,8 +152,9 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
   font-size: .75rem; font-weight: 900; letter-spacing: .12em; transform: rotate(10deg); opacity: .84;
 }
 .passport-stamp b { font-size: 1.2rem; }.passport-stamp small { margin-top: 3px; }
-.flight-line { position: absolute; left: -20px; right: 20px; top: 31%; border-top: 3px dashed rgba(23,105,170,.35); transform: rotate(-14deg); }
-.flight-line svg { position: absolute; right: -12px; top: -34px; width: 70px; color: var(--arrival-blue); transform: rotate(4deg); }
+.flight-line { position: absolute; z-index: 1; left: 50%; top: 48%; width: 205px; border-top: 3px dashed rgba(23,105,170,.42); transform: rotate(-38deg); transform-origin: left center; }
+.flight-line::after { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; background: var(--arrival-blue); box-shadow: 0 0 0 3px rgba(23,105,170,.12); }
+.flight-line svg { position: absolute; right: -12px; top: -34px; width: 70px; color: var(--arrival-blue); transform: rotate(180deg); }
 
 .briefing-card {
   position: relative; z-index: 3; grid-column: 1 / -1; display: grid; grid-template-columns: 180px 1fr;
