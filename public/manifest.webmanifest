@@ -1,0 +1,32 @@
+{
+  "name": "Final Call 第三關 入境申報快問快答",
+  "short_name": "Final Call 3",
+  "description": "五類入境申報競速挑戰",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#e9f4ed",
+  "theme_color": "#0b6b55",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "./app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
