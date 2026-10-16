@@ -128,7 +128,6 @@ function BriefingCard() {
     <div className="briefing-card" aria-label="五大申報門檻">
       <div className="briefing-card__title">
         <span>入境前快速確認</span>
-        <strong>五類各抽一題</strong>
       </div>
       <div className="threshold-list">
         {ordered.map((category) => (
@@ -148,7 +147,6 @@ function ReadyScreen({ onStart }: { onStart: () => void }) {
   return (
     <section className="ready-screen screen">
       <div className="hero-copy">
-        <div className="eyebrow"><span>TAIWAN CUSTOMS</span><span>第三關</span></div>
         <h1>你能順利<br /><em>入境臺灣</em>嗎？</h1>
         <p>判斷旅客攜帶的物品是否須申報，連續答對五題才能通關。</p>
         <button className="start-button" onClick={onStart}>
@@ -256,8 +254,7 @@ function QuestionScreen({
 
       <article className="declaration-card">
         <div className="declaration-card__meta">
-          <span>ARRIVAL DECLARATION</span>
-          <b>QUESTION {String(state.questionIndex + 1).padStart(2, "0")}</b>
+          <span>ARRIVAL DECLARATION · QUESTION {String(state.questionIndex + 1).padStart(2, "0")}</span>
         </div>
         {gameConfig.showCategory && (
           <div className={`category-pill category-pill--${question.category}`}>
@@ -265,35 +262,37 @@ function QuestionScreen({
             <span>{categories[question.category].name}</span>
           </div>
         )}
-        <h1>{question.prompt}</h1>
+        <div className="question-content">
+          <h1>{question.prompt}</h1>
 
-        <div className="channel-choice" aria-label="請選擇是否須申報">
-          {([true, false] as const).map((answer) => {
-            const correct = answered && question.mustDeclare === answer;
-            const wrong = answered && state.selectedAnswer === answer && !correct;
-            return (
-              <button
-                key={String(answer)}
-                className={`choice-button ${correct ? "is-correct" : ""} ${wrong ? "is-wrong" : ""}`}
-                disabled={answered}
-                onClick={() => onAnswer(answer)}
-              >
-                <span className="choice-button__sign">{answer ? "申" : "免"}</span>
-                <span><strong>{answer ? "須申報" : "不需申報"}</strong></span>
-                {correct && <b className="choice-result">✓ 正確</b>}
-                {wrong && <b className="choice-result">× 錯誤</b>}
-              </button>
-            );
-          })}
+          <div className="channel-choice" aria-label="請選擇是否須申報">
+            {([true, false] as const).map((answer) => {
+              const correct = answered && question.mustDeclare === answer;
+              const wrong = answered && state.selectedAnswer === answer && !correct;
+              return (
+                <button
+                  key={String(answer)}
+                  className={`choice-button ${correct ? "is-correct" : ""} ${wrong ? "is-wrong" : ""}`}
+                  disabled={answered}
+                  onClick={() => onAnswer(answer)}
+                >
+                  <span className="choice-button__sign">{answer ? "申" : "免"}</span>
+                  <span><strong>{answer ? "須申報" : "不需申報"}</strong></span>
+                  {correct && <b className="choice-result">✓ 正確</b>}
+                  {wrong && <b className="choice-result">× 錯誤</b>}
+                </button>
+              );
+            })}
+          </div>
+
+          <Feedback result={state.result} />
+
+          {gameConfig.flowMode === "guided" && answered && !isLastCorrect && (
+            <button className="guided-next" onClick={state.result === "correct" ? onNext : onRestart}>
+              {state.result === "correct" ? "下一題" : "重新開始"}<span>→</span>
+            </button>
+          )}
         </div>
-
-        <Feedback result={state.result} />
-
-        {gameConfig.flowMode === "guided" && answered && !isLastCorrect && (
-          <button className="guided-next" onClick={state.result === "correct" ? onNext : onRestart}>
-            {state.result === "correct" ? "下一題" : "重新開始"}<span>→</span>
-          </button>
-        )}
       </article>
     </section>
   );
@@ -403,7 +402,6 @@ export default function App() {
         )}
         <footer className="app-footer">
           <span>RUNWAY GO! 2026 桃機活力嘉年華</span>
-          <span>APP {gameConfig.appVersion}・題庫 {gameConfig.questionBankVersion}</span>
         </footer>
       </div>
       {state.showResetDialog && (
