@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { gameConfig } from "./config";
 import { createRound, TARGET_STREAK, validateQuestionBank } from "./game";
 import { CategoryIcon, PlaneIcon, TaiwanMark } from "./icons";
@@ -14,6 +14,7 @@ const SOUND_FILES: Record<SoundName, { src: string; volume: number }> = {
   wrong: { src: "./sounds/wrong.mp3", volume: 0.62 },
   success: { src: "./sounds/game_win.mp3", volume: 0.72 },
 };
+const SOUND_PREFERENCE_KEY = "final-call-sound-enabled";
 
 function useGameSounds() {
   const soundsRef = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
@@ -41,7 +42,7 @@ function useGameSounds() {
     };
   }, []);
 
-  return useCallback((name: SoundName) => {
+  const playSound = useCallback((name: SoundName) => {
     const audio = soundsRef.current[name];
     if (!audio) return;
 
@@ -49,6 +50,12 @@ function useGameSounds() {
     audio.currentTime = 0;
     void audio.play().catch(() => undefined);
   }, []);
+
+  const stopSounds = useCallback(() => {
+    Object.values(soundsRef.current).forEach((audio) => audio?.pause());
+  }, []);
+
+  return { playSound, stopSounds };
 }
 
 export type State = {
@@ -147,7 +154,17 @@ export function reducer(state: State, action: Action): State {
   }
 }
 
-function AppHeader({ onReset, canReset }: { onReset: () => void; canReset: boolean }) {
+function AppHeader({
+  onReset,
+  canReset,
+  soundEnabled,
+  onToggleSound,
+}: {
+  onReset: () => void;
+  canReset: boolean;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
+}) {
   return (
     <header className="app-header">
       <div className="stage-mark">
@@ -157,11 +174,26 @@ function AppHeader({ onReset, canReset }: { onReset: () => void; canReset: boole
       <div className="arrival-route" aria-label="抵達臺灣">
         <span>ARRIVALS</span><i /><strong>TPE</strong>
       </div>
-      {canReset ? (
-        <button className="staff-reset" onClick={onReset}>結束本次挑戰</button>
-      ) : (
-        <span className="header-spacer" aria-hidden="true" />
-      )}
+      <div className="header-controls">
+        <button
+          className={`sound-toggle ${soundEnabled ? "" : "is-muted"}`}
+          type="button"
+          aria-label={soundEnabled ? "關閉音效" : "開啟音效"}
+          aria-pressed={soundEnabled}
+          onClick={onToggleSound}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 10v4h4l5 4V6l-5 4H4Z" />
+            {soundEnabled ? (
+              <path d="M16 9.5a4 4 0 0 1 0 5m2.7-7.7a8 8 0 0 1 0 10.4" />
+            ) : (
+              <path d="m16 10 5 5m0-5-5 5" />
+            )}
+          </svg>
+          <span>{soundEnabled ? "音效開" : "音效關"}</span>
+        </button>
+        {canReset && <button className="staff-reset" onClick={onReset}>結束本次挑戰</button>}
+      </div>
     </header>
   );
 }
@@ -385,12 +417,30 @@ function ResetDialog({ onCancel, onConfirm }: { onCancel: () => void; onConfirm:
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const bankProblems = useMemo(() => validateQuestionBank(), []);
-  const playSound = useGameSounds();
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return window.localStorage.getItem(SOUND_PREFERENCE_KEY) !== "false";
+    } catch {
+      return true;
+    }
+  });
+  const { playSound, stopSounds } = useGameSounds();
+
+  const toggleSound = useCallback(() => {
+    const nextValue = !soundEnabled;
+    setSoundEnabled(nextValue);
+    if (!nextValue) stopSounds();
+    try {
+      window.localStorage.setItem(SOUND_PREFERENCE_KEY, String(nextValue));
+    } catch {
+      // Sound controls should remain usable when browser storage is unavailable.
+    }
+  }, [soundEnabled, stopSounds]);
 
   const startRound = useCallback((type: "PREPARE" | "NEXT_PLAYER") => {
-    playSound("countdown");
+    if (soundEnabled) playSound("countdown");
     dispatch({ type, round: createRound() });
-  }, [playSound]);
+  }, [playSound, soundEnabled]);
 
   useEffect(() => {
     if (state.phase !== "countdown") return;
@@ -419,13 +469,13 @@ export default function App() {
   }, [state.phase, state.result, state.streak]);
 
   useEffect(() => {
-    if (state.phase !== "playing" || state.result === "idle") return;
+    if (!soundEnabled || state.phase !== "playing" || state.result === "idle") return;
     playSound(state.result);
-  }, [playSound, state.phase, state.result]);
+  }, [playSound, soundEnabled, state.phase, state.result]);
 
   useEffect(() => {
-    if (state.phase === "success") playSound("success");
-  }, [playSound, state.phase]);
+    if (soundEnabled && state.phase === "success") playSound("success");
+  }, [playSound, soundEnabled, state.phase]);
 
   if (bankProblems.length > 0) {
     return (
@@ -443,6 +493,8 @@ export default function App() {
         <AppHeader
           canReset={state.phase === "playing" || state.phase === "countdown"}
           onReset={() => dispatch({ type: "OPEN_RESET" })}
+          soundEnabled={soundEnabled}
+          onToggleSound={toggleSound}
         />
         {state.phase === "ready" && <ReadyScreen onStart={() => startRound("PREPARE")} />}
         {state.phase === "countdown" && <CountdownScreen value={state.countdown} />}

@@ -96,12 +96,19 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
 .arrival-route i { width: 72px; height: 2px; background: repeating-linear-gradient(90deg, white 0 9px, transparent 9px 15px); }
 .arrival-route strong { font-size: 1.55rem; }
 
-.staff-reset {
-  justify-self: end; padding: 10px 14px; border: 1px solid rgba(255,255,255,.26);
+.header-controls { justify-self: end; min-width: 110px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+
+.sound-toggle, .staff-reset {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 40px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.26);
   border-radius: 10px; color: rgba(255,255,255,.8); background: transparent;
   cursor: pointer; font-size: .82rem; font-weight: 700;
 }
-.header-spacer { min-width: 110px; }
+.sound-toggle { min-width: 76px; }
+.sound-toggle svg { width: 19px; height: 19px; fill: currentColor; }
+.sound-toggle svg path:last-child { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.sound-toggle.is-muted { color: #ffe1c9; border-color: rgba(238,122,50,.75); background: rgba(238,122,50,.16); }
+.sound-toggle:active, .staff-reset:active { transform: translateY(1px); }
 
 .screen { min-height: 0; }
 .ready-screen {
