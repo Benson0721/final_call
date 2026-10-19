@@ -8,6 +8,10 @@ const APP_SHELL = [
   "./app-icon-512.png",
   "./assets/app.js",
   "./assets/app.css",
+  "./sounds/countdown.mp3",
+  "./sounds/correct.mp3",
+  "./sounds/wrong.mp3",
+  "./sounds/game_win.mp3",
 ];
 
 self.addEventListener("install", (event) => {

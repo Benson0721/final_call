@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { gameConfig } from "./config";
 import { createRound, TARGET_STREAK, validateQuestionBank } from "./game";
 import { CategoryIcon, PlaneIcon, TaiwanMark } from "./icons";
@@ -6,6 +6,50 @@ import { categories, type Question } from "./questions";
 
 type Phase = "ready" | "countdown" | "playing" | "success";
 type Result = "idle" | "correct" | "wrong";
+type SoundName = "countdown" | "correct" | "wrong" | "success";
+
+const SOUND_FILES: Record<SoundName, { src: string; volume: number }> = {
+  countdown: { src: "./sounds/countdown.mp3", volume: 0.64 },
+  correct: { src: "./sounds/correct.mp3", volume: 0.68 },
+  wrong: { src: "./sounds/wrong.mp3", volume: 0.62 },
+  success: { src: "./sounds/game_win.mp3", volume: 0.72 },
+};
+
+function useGameSounds() {
+  const soundsRef = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
+
+  useEffect(() => {
+    const sounds = {} as Record<SoundName, HTMLAudioElement>;
+
+    (Object.keys(SOUND_FILES) as SoundName[]).forEach((name) => {
+      const { src, volume } = SOUND_FILES[name];
+      const audio = new Audio(src);
+      audio.preload = "auto";
+      audio.volume = volume;
+      sounds[name] = audio;
+    });
+
+    soundsRef.current = sounds;
+
+    return () => {
+      Object.values(sounds).forEach((audio) => {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      });
+      soundsRef.current = {};
+    };
+  }, []);
+
+  return useCallback((name: SoundName) => {
+    const audio = soundsRef.current[name];
+    if (!audio) return;
+
+    audio.pause();
+    audio.currentTime = 0;
+    void audio.play().catch(() => undefined);
+  }, []);
+}
 
 export type State = {
   phase: Phase;
@@ -341,6 +385,12 @@ function ResetDialog({ onCancel, onConfirm }: { onCancel: () => void; onConfirm:
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const bankProblems = useMemo(() => validateQuestionBank(), []);
+  const playSound = useGameSounds();
+
+  const startRound = useCallback((type: "PREPARE" | "NEXT_PLAYER") => {
+    playSound("countdown");
+    dispatch({ type, round: createRound() });
+  }, [playSound]);
 
   useEffect(() => {
     if (state.phase !== "countdown") return;
@@ -368,6 +418,15 @@ export default function App() {
     }
   }, [state.phase, state.result, state.streak]);
 
+  useEffect(() => {
+    if (state.phase !== "playing" || state.result === "idle") return;
+    playSound(state.result);
+  }, [playSound, state.phase, state.result]);
+
+  useEffect(() => {
+    if (state.phase === "success") playSound("success");
+  }, [playSound, state.phase]);
+
   if (bankProblems.length > 0) {
     return (
       <main className="fatal-error">
@@ -385,7 +444,7 @@ export default function App() {
           canReset={state.phase === "playing" || state.phase === "countdown"}
           onReset={() => dispatch({ type: "OPEN_RESET" })}
         />
-        {state.phase === "ready" && <ReadyScreen onStart={() => dispatch({ type: "PREPARE", round: createRound() })} />}
+        {state.phase === "ready" && <ReadyScreen onStart={() => startRound("PREPARE")} />}
         {state.phase === "countdown" && <CountdownScreen value={state.countdown} />}
         {state.phase === "playing" && (
           <QuestionScreen
@@ -397,7 +456,7 @@ export default function App() {
         )}
         {state.phase === "success" && (
           <SuccessScreen
-            onNextPlayer={() => dispatch({ type: "NEXT_PLAYER", round: createRound() })}
+            onNextPlayer={() => startRound("NEXT_PLAYER")}
           />
         )}
         <footer className="app-footer">
