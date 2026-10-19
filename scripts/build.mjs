@@ -1,4 +1,5 @@
 import { build } from "esbuild";
+import { createHash } from "node:crypto";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,5 +39,19 @@ const productionHtml = sourceHtml
 
 await writeFile(join(outputDir, "index.html"), productionHtml, "utf8");
 await cp(join(projectRoot, "public"), outputDir, { recursive: true });
+
+const buildFingerprint = createHash("sha256")
+  .update(await readFile(join(outputDir, "index.html")))
+  .update(await readFile(join(assetsDir, "app.js")))
+  .update(await readFile(join(assetsDir, "app.css")))
+  .digest("hex")
+  .slice(0, 12);
+const serviceWorkerPath = join(outputDir, "sw.js");
+const serviceWorker = await readFile(serviceWorkerPath, "utf8");
+await writeFile(
+  serviceWorkerPath,
+  serviceWorker.replace("__BUILD_ID__", buildFingerprint),
+  "utf8",
+);
 
 console.log("Built production app in dist/");
