@@ -442,6 +442,18 @@ export default function App() {
     dispatch({ type, round: createRound() });
   }, [playSound, soundEnabled]);
 
+  const answerQuestion = useCallback((answer: boolean) => {
+    const question = state.round[state.questionIndex];
+    const completesChallenge = state.phase === "playing"
+      && state.result === "idle"
+      && question?.mustDeclare === answer
+      && state.streak === TARGET_STREAK - 1;
+
+    // iPad Safari needs this audio to start inside the actual answer tap.
+    if (soundEnabled && completesChallenge) playSound("success");
+    dispatch({ type: "ANSWER", answer });
+  }, [playSound, soundEnabled, state.phase, state.questionIndex, state.result, state.round, state.streak]);
+
   useEffect(() => {
     if (state.phase !== "countdown") return;
     const timer = window.setTimeout(() => dispatch({ type: "COUNTDOWN_TICK" }), 1000);
@@ -470,12 +482,9 @@ export default function App() {
 
   useEffect(() => {
     if (!soundEnabled || state.phase !== "playing" || state.result === "idle") return;
+    if (state.result === "correct" && state.streak === TARGET_STREAK) return;
     playSound(state.result);
-  }, [playSound, soundEnabled, state.phase, state.result]);
-
-  useEffect(() => {
-    if (soundEnabled && state.phase === "success") playSound("success");
-  }, [playSound, soundEnabled, state.phase]);
+  }, [playSound, soundEnabled, state.phase, state.result, state.streak]);
 
   if (bankProblems.length > 0) {
     return (
@@ -501,7 +510,7 @@ export default function App() {
         {state.phase === "playing" && (
           <QuestionScreen
             state={state}
-            onAnswer={(answer) => dispatch({ type: "ANSWER", answer })}
+            onAnswer={answerQuestion}
             onNext={() => dispatch({ type: "NEXT_QUESTION" })}
             onRestart={() => dispatch({ type: "RESTART_ROUND", round: createRound() })}
           />
