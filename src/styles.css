@@ -104,7 +104,7 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
 
 .header-controls { justify-self: end; min-width: 110px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
 
-.sound-toggle, .staff-reset {
+.sound-toggle, .staff-reset, .success-restart {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   min-height: 40px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.26);
   border-radius: 10px; color: rgba(255,255,255,.8); background: transparent;
@@ -114,7 +114,8 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
 .sound-toggle svg { width: 19px; height: 19px; fill: currentColor; }
 .sound-toggle svg path:last-child { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .sound-toggle.is-muted { color: #ffe1c9; border-color: rgba(238,122,50,.75); background: rgba(238,122,50,.16); }
-.sound-toggle:active, .staff-reset:active { transform: translateY(1px); }
+.sound-toggle:active, .staff-reset:active, .success-restart:active { transform: translateY(1px); }
+.success-restart { color: #06493c; border-color: #f6d26b; background: #f6d26b; box-shadow: 0 2px 0 rgba(0,0,0,.22); }
 
 .screen { min-height: 0; }
 .ready-screen {
@@ -141,15 +142,15 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
 .hero-copy h1 em { color: var(--channel-red); font-style: normal; }
 .hero-copy p { max-width: 660px; margin: 20px 0 25px; color: var(--muted); font-size: clamp(1rem, 1.65vw, 1.3rem); line-height: 1.6; font-weight: 700; }
 
-.start-button, .next-player-button, .guided-next {
+.start-button, .guided-next {
   min-height: 64px; border: 0; border-radius: 14px; color: white;
   background: var(--signal-orange); box-shadow: 0 7px 0 #b84d17, 0 14px 24px rgba(203,80,24,.2);
   cursor: pointer; font-weight: 950; transition: transform 150ms ease, filter 150ms ease;
 }
 .start-button { min-width: 280px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; gap: 20px; font-size: 1.25rem; }
 .start-button svg { width: 48px; }
-.start-button:hover, .next-player-button:hover, .guided-next:hover { filter: brightness(1.06); transform: translateY(-2px); }
-.start-button:active, .next-player-button:active, .guided-next:active { transform: translateY(5px); box-shadow: 0 2px 0 #b84d17; }
+.start-button:hover, .guided-next:hover { filter: brightness(1.06); transform: translateY(-2px); }
+.start-button:active, .guided-next:active { transform: translateY(5px); box-shadow: 0 2px 0 #b84d17; }
 
 .hero-visual { position: relative; z-index: 1; align-self: stretch; min-height: 280px; }
 .taiwan-orbit {
@@ -233,7 +234,7 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
 .success-route { position: absolute; left: -4%; right: -4%; top: 27%; border-top: 4px dashed rgba(23,105,170,.25); transform: rotate(-8deg); }.success-route svg { position: absolute; right: 6%; top: -48px; width: 100px; color: var(--arrival-blue); }
 .clearance-stamp { position: relative; z-index: 2; justify-self: center; width: min(330px,34vw); aspect-ratio: 1; display: grid; place-content: center; justify-items: center; border: 12px double var(--customs-green); border-radius: 50%; color: var(--customs-green); background: rgba(255,255,255,.75); transform: rotate(-7deg); box-shadow: 0 18px 40px rgba(11,107,85,.13); }
 .clearance-stamp svg { width: 56px; height: 76px; }.clearance-stamp span { font-size: 1rem; font-weight: 900; letter-spacing: .18em; }.clearance-stamp strong { font-size: clamp(2rem,4vw,3.5rem); line-height: 1; }.clearance-stamp small { margin-top: 9px; font-size: .7rem; font-weight: 900; letter-spacing: .15em; }
-.success-copy { position: relative; z-index: 2; text-align: center; }.success-copy > span { color: var(--customs-green); font-weight: 900; letter-spacing: .12em; }.success-copy h1 { margin: 13px 0 20px; color: var(--customs-deep); font-size: clamp(3rem,6.5vw,6rem); line-height: .97; letter-spacing: -.06em; }.five-clears { display: flex; justify-content: center; gap: 9px; margin-bottom: 28px; }.five-clears i { position: relative; width: 50px; height: 50px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--customs-green); box-shadow: 0 4px 0 #06493c; font-style: normal; font-weight: 950; }.five-clears svg { position: absolute; width: 28px; height: 28px; opacity: .22; }.next-player-button { min-width: 280px; padding: 13px 26px; display: inline-flex; align-items: center; justify-content: center; gap: 24px; font-size: 1.22rem; }
+.success-copy { position: relative; z-index: 2; text-align: center; }.success-copy > span { color: var(--customs-green); font-weight: 900; letter-spacing: .12em; }.success-copy h1 { margin: 13px 0 20px; color: var(--customs-deep); font-size: clamp(3rem,6.5vw,6rem); line-height: .97; letter-spacing: -.06em; }.five-clears { display: flex; justify-content: center; gap: 9px; margin-bottom: 0; }.five-clears i { position: relative; width: 50px; height: 50px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--customs-green); box-shadow: 0 4px 0 #06493c; font-style: normal; font-weight: 950; }.five-clears svg { position: absolute; width: 28px; height: 28px; opacity: .22; }
 
 .app-footer { min-height: 30px; display: flex; align-items: center; padding: 5px 18px; color: #71847d; border-top: 1px solid #d9e2de; background: #f5f6f2; font-size: .62rem; font-weight: 800; letter-spacing: .04em; }
 .dialog-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(4,39,32,.64); backdrop-filter: blur(7px); }
@@ -261,8 +262,7 @@ button:focus-visible { outline: 4px solid #f9b942; outline-offset: 4px; }
   .clearance-stamp { width: min(250px,28vw); border-width: 9px; }
   .clearance-stamp svg { width: 43px; height: 58px; }.clearance-stamp span { font-size: .8rem; }.clearance-stamp small { margin-top: 5px; font-size: .58rem; }
   .success-copy h1 { margin: 8px 0 13px; font-size: clamp(2.45rem,5.2vw,4rem); }
-  .five-clears { gap: 7px; margin-bottom: 16px; }.five-clears i { width: 42px; height: 42px; }.five-clears svg { width: 23px; height: 23px; }
-  .next-player-button { min-width: 235px; min-height: 54px; padding: 10px 20px; font-size: 1rem; }
+  .five-clears { gap: 7px; margin-bottom: 0; }.five-clears i { width: 42px; height: 42px; }.five-clears svg { width: 23px; height: 23px; }
 }
 
 @media (orientation: portrait) and (max-width: 760px) {

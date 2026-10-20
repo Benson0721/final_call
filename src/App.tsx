@@ -157,11 +157,15 @@ export function reducer(state: State, action: Action): State {
 function AppHeader({
   onReset,
   canReset,
+  onRestart,
+  canRestart,
   soundEnabled,
   onToggleSound,
 }: {
   onReset: () => void;
   canReset: boolean;
+  onRestart: () => void;
+  canRestart: boolean;
   soundEnabled: boolean;
   onToggleSound: () => void;
 }) {
@@ -192,7 +196,11 @@ function AppHeader({
           </svg>
           <span>{soundEnabled ? "音效開" : "音效關"}</span>
         </button>
-        {canReset && <button className="staff-reset" onClick={onReset}>結束本次挑戰</button>}
+        {canRestart ? (
+          <button className="success-restart" type="button" onClick={onRestart}>重新開始</button>
+        ) : canReset ? (
+          <button className="staff-reset" type="button" onClick={onReset}>結束本次挑戰</button>
+        ) : null}
       </div>
     </header>
   );
@@ -374,7 +382,7 @@ function QuestionScreen({
   );
 }
 
-function SuccessScreen({ onNextPlayer }: { onNextPlayer: () => void }) {
+function SuccessScreen() {
   return (
     <section className="success-screen screen">
       <div className="success-route" aria-hidden="true"><PlaneIcon /><span /></div>
@@ -392,7 +400,6 @@ function SuccessScreen({ onNextPlayer }: { onNextPlayer: () => void }) {
             <i key={category.id}><CategoryIcon category={category.id} />✓</i>
           ))}
         </div>
-        <button className="next-player-button" onClick={onNextPlayer}>下一位參賽者<span>→</span></button>
       </div>
     </section>
   );
@@ -501,7 +508,9 @@ export default function App() {
       <div className="app-window">
         <AppHeader
           canReset={state.phase === "playing" || state.phase === "countdown"}
+          canRestart={state.phase === "success"}
           onReset={() => dispatch({ type: "OPEN_RESET" })}
+          onRestart={() => startRound("NEXT_PLAYER")}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
         />
@@ -515,11 +524,7 @@ export default function App() {
             onRestart={() => dispatch({ type: "RESTART_ROUND", round: createRound() })}
           />
         )}
-        {state.phase === "success" && (
-          <SuccessScreen
-            onNextPlayer={() => startRound("NEXT_PLAYER")}
-          />
-        )}
+        {state.phase === "success" && <SuccessScreen />}
         <footer className="app-footer">
           <span>RUNWAY GO! 2026 桃機活力嘉年華</span>
         </footer>
